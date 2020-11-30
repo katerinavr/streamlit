@@ -31,38 +31,41 @@ def moltoimage(smiles):
 def predicted_pairs():
     zinc_dataset = pd.read_csv('data/zinc15_dataset.csv')
     total_scores = pd.read_csv('data/final_scores.csv')
-
-    st.write('Here you can visualize the predicted pairs and optimize your selection based on some electronic properties')
     
-    endpoints = zinc_dataset.smiles.values
-    selected_endpoint = st.selectbox('Select a molecule of interest to find the top scored co-formers',endpoints)
-    print(selected_endpoint)
+    na = zinc_dataset.iloc[:, :2].head()
+    PandasTools.AddMoleculeColumnToFrame(na,'smiles','Molecule',includeFingerprints=True)
+    st.write(na, unsafe_allow_html=True)
+    #st.write('Here you can visualize the predicted pairs and optimize your selection based on some electronic properties')
+    
+    #endpoints = zinc_dataset.smiles.values
+    #selected_endpoint = st.selectbox('Select a molecule of interest to find the top scored co-formers',endpoints)
+    #print(selected_endpoint)
     #st.write(selected_endpoint)
     #coformer=[]
-    score=[]
-    molecules = total_scores.mol2[total_scores.mol1 == selected_endpoint].values + total_scores.mol1[total_scores.mol2 == selected_endpoint].values
+    #score=[]
+    #molecules = total_scores.mol2[total_scores.mol1 == selected_endpoint].values + total_scores.mol1[total_scores.mol2 == selected_endpoint].values
     #for i in molecules:
     #    try:
     #        score.append(total_scores.score[total_scores.mol1 == i].values)
     #    except ValueError:
     #        score.append(total_scores.score[total_scores.mol1 == i].values)
     #score.append([total_scores.score[total_scores.mol2 == i] for i in molecules])
-    for i in molecules: 
-        if i in total_scores.mol1.values:
-            score.append(i) #total_scores.score[total_scores.mol1 == i])
+    #for i in molecules: 
+      #  if i in total_scores.mol1.values:
+     #       score.append(i) #total_scores.score[total_scores.mol1 == i])
 
     #df= pd.concat([pd.DataFrame(molecules , columns=['Smiles']), 
     #pd.DataFrame(score , columns=['score'])],axis=1)
-    df= pd.DataFrame(molecules , columns=['Smiles'])
-    #st.write(df)
-    PandasTools.AddMoleculeColumnToFrame(df,'Smiles','Molecule',includeFingerprints=True)
+    #df= pd.DataFrame(molecules , columns=['Smiles'])
+    #PandasTools.AddMoleculeColumnToFrame(df,'Smiles','Molecule',includeFingerprints=True)
+    #print(df)
     #mols = [Chem.MolFromSmiles(i)  for i in df['Smiles'].values] 
     #for i in molecules:
     #    st.image(moltoimage(i))
     #df['Smiles'].values[0]))
     #st.write(df['Smiles'].values[0])
     #st.image(Draw.MolsToGridImage(mols))
-    st.write(score, unsafe_allow_html=True)
+    #st.write(score, unsafe_allow_html=True)
 
     if st.checkbox('Optimize Selection'):
         st.subheader('Pareto Optimization based on selected property')
