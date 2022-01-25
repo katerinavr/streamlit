@@ -6,7 +6,6 @@ opencv-python==3.4.0.14
 packaging==16.8
 pandas==0.19.2
 picklable-itertools==0.1.1
-Pillow==4.1.0
 progressbar2==3.18.1
 pycrayon==0.5
 pyparsing==2.2.0
