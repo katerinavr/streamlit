@@ -1,7 +1,6 @@
 matplotlib
 numexpr==2.6.2
-numpy==1.12.1
-olefile==0.44
+numpy
 opencv-python==3.4.0.14
 packaging==16.8
 pandas==0.19.2
