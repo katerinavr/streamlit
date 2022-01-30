@@ -78,7 +78,6 @@ pyparsing==2.4.7
 pyrsistent==0.17.3
 python-dateutil==2.8.1
 pytz-deprecation-shim==0.1.0.post0
-pywin32==303
 pywinpty==0.5.7
 pyzmq==22.0.3
 reportlab==3.5.67
