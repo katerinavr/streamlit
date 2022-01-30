@@ -13,7 +13,6 @@ bleach==3.3.0
 blinker==1.4
 cachetools==5.0.0
 certifi==2020.12.5
-cffi @ file:///D:/bld/cffi_1613414034267/work
 charset-normalizer==2.0.10
 ChemSpiPy==2.0.0
 click==8.0.3
@@ -28,17 +27,13 @@ gitdb==4.0.9
 GitPython==3.1.26
 google-auth==1.23.0
 google-auth-oauthlib==0.4.2
-google-pasta==0.2.0
-greenlet @ file:///D:/bld/greenlet_1615997646136/work
 h5py==2.10.0
 idna==3.3
-importlib-metadata @ file:///D:/bld/importlib-metadata_1618291899238/work
 ipykernel==5.5.5
 ipython==7.23.1
 ipython-genutils==0.2.0
 ipywidgets==7.6.5
 jedi==0.18.0
-Jinja2 @ file:///home/conda/feedstock_root/build_artifacts/jinja2_1612119311452/work
 joblib==1.0.1
 jsonschema==3.2.0
 jupyter-client==6.1.12
@@ -46,11 +41,8 @@ jupyter-core==4.7.1
 jupyterlab-pygments==0.1.2
 jupyterlab-widgets==1.0.2
 Keras-Preprocessing==1.1.2
-kiwisolver @ file:///D:/bld/kiwisolver_1610099949969/work
 llvmlite==0.34.0
 Markdown==3.3.3
-MarkupSafe @ file:///D:/bld/markupsafe_1610127696479/work
-matplotlib @ file:///D:/bld/matplotlib-suite_1617212897530/work
 matplotlib-inline==0.1.2
 mistune==0.8.4
 mkl-service==2.3.0
@@ -65,15 +57,12 @@ notebook==6.4.0
 numba==0.51.2
 numpy==1.19.0
 oauthlib==3.1.0
-olefile @ file:///home/conda/feedstock_root/build_artifacts/olefile_1602866521163/work
 opt-einsum==3.3.0
 packaging==21.3
-pandas @ file:///D:/bld/pandas_1618263797069/work
 pandocfilters==1.4.3
 parso==0.8.2
 patsy==0.5.1
 pickleshare==0.7.5
-Pillow @ file:///D:/bld/pillow_1617818313521/work
 prometheus-client==0.10.1
 prompt-toolkit==3.0.18
 protobuf==3.19.3
@@ -81,7 +70,6 @@ pyarrow==6.0.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycairo==1.20.0
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1593275161868/work
 pydeck==0.7.1
 Pygments==2.11.2
 Pympler==1.0.1
@@ -89,22 +77,17 @@ pyod==0.8.4
 pyparsing==2.4.7
 pyrsistent==0.17.3
 python-dateutil==2.8.1
-pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1612179539967/work
 pytz-deprecation-shim==0.1.0.post0
 pywin32==303
 pywinpty==0.5.7
 pyzmq==22.0.3
-ranking-phase-fields @ file:///C:/Users/kvriza/Downloads/PhaseFieldRanking-master/PhaseFieldRanking-master
 reportlab==3.5.67
 requests==2.27.1
 requests-oauthlib==1.3.0
 rsa==4.6
 scikit-learn==0.22.2
-scipy @ file:///C:/bld/scipy_1616878817947/work
 Send2Trash==1.5.0
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1590081179328/work
 smmap==5.0.0
-SQLAlchemy @ file:///D:/bld/sqlalchemy_1618646095200/work
 statsmodels==0.12.1
 streamlit==1.4.0
 suod==0.0.4
@@ -118,10 +101,7 @@ toml==0.10.2
 toolz==0.11.2
 torch==1.8.1
 torchvision==0.9.1
-tornado @ file:///D:/bld/tornado_1610094878337/work
-tqdm @ file:///home/conda/feedstock_root/build_artifacts/tqdm_1617680194207/work
 traitlets==5.0.5
-typing-extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1602702424206/work
 tzdata==2021.5
 tzlocal==4.1
 urllib3==1.26.8
@@ -133,4 +113,4 @@ widgetsnbextension==3.5.2
 wincertstore==0.2
 wrapt==1.12.1
 XlsxWriter==1.3.7
-zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1614945704755/work
+
