@@ -3,7 +3,7 @@ import altair as alt
 import pandas as pd
 import numpy as np
 import base64
-import os, urllib, cv2
+import os, urllib
 from descriptors import *
 from one_class import *
 import torch 
