@@ -128,7 +128,7 @@ class DeepSVDD(object):
     def load_model(self, model_path, load_ae=False):
         """Load Deep SVDD model from model_path."""
 
-        model_dict = torch.load(model_path)
+        model_dict = torch.load(model_path,map_location='cpu')
 
         self.R = model_dict['R']
         self.c = model_dict['c']

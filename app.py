@@ -4,56 +4,57 @@ import pandas as pd
 import numpy as np
 import base64
 import os, urllib
-from descriptors import *
-from one_class import *
-import torch 
-from pairs_explorer import *
+#import deep_one_class.ecfp4
+from rdkit import Chem
+from deep_one_class.ecfp4 import *
+from deep_one_class.src.utils.ranking_plot import *
+from deep_one_class.src.utils.plottly_ranking import *
 
-def main():
-    # Render the readme as markdown using st.markdown.
-    readme_text = st.markdown(get_file_content_as_string("instructions.md"))
-    intro_figure = "Picture1.png"
-    st.sidebar.title("Co-Crystal-Net")
-    app_mode = st.sidebar.selectbox("Choose your preference",
-        ["Show instructions", "Calculate descriptors", "Deep One Class Classification", 
-        "Interprete the model", "Pairs Explorer", "Design novel pairs"])        
-    if app_mode == "Show instructions":
-        #st.sidebar.success('To continue select "Run the app".')
-        st.image(intro_figure, use_column_width=True) 
-    elif app_mode == "Calculate descriptors":
-        readme_text.empty()
-        mordred_descriptors()
-    elif app_mode == "Deep One Class Classification":
-        plot_scores()
-        #tza()
-        #load_data()
-        #train_and_score()
-        #st.sidebar.success('To continue select "Run the app".')
-    elif app_mode == "Interprete the model":
-        readme_text.empty()
-    elif app_mode == "Pairs Explorer":
-        readme_text.empty()
-        #df = pd.read_csv('data/dataset1.csv')
-        #st.dataframe(df)
-        predicted_pairs()
-    elif app_mode == "Design novel pairs":
-        readme_text.empty()
-        st.write(readme_text.read())
+# Title the app
+st.title('Molecular Set Transformer')
 
-@st.cache(show_spinner=False)
-def get_file_content_as_string(path):
-    url = 'https://raw.githubusercontent.com/katerinavr/streamlit/master/' + path
-    response = urllib.request.urlopen(url)
-    return response.read().decode("utf-8")
+# Set page config
+st.markdown("""
+ * Use the menu at left to input the molecular pairs and select the model
+ * Press the Predict button
+ * Your plots will appear below
+""")
 
-def get_table_download_link(df):
-    """Generates a link allowing the data in a given panda dataframe to be downloaded
-    in:  dataframe
-    out: href string
-    """
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    href = f'<a href="data:file/csv;base64,{b64}">Download csv file</a>'
+st.sidebar.markdown("## Define molecular pairs")
+smiles1 = st.sidebar.text_area('Input the SMILES of the first coformer (API):') 
+smiles2 = st.sidebar.text_area('Input the SMILES of the second coformer (excipient):') 
+st.sidebar.markdown("## Pretrained models")
+model= st.sidebar.selectbox('Select the machine learning model',
+                                    ['ECFP4', 'GNN'])
 
-if __name__ == "__main__":
-    main()
+def rank_pairs(smiles1, smiles2, model):
+    # print a dataframe with smiles1 smiles2 score and uncertainty
+    if model == 'GNN':
+        pass
+        #call GNN model and fingerprint
+        #scores, std = gnn.score(smiles1, smiles2)
+    
+    else: 
+        # call ECFP4 model and fingerprint
+        # check if a valid smiles is given
+        # print uncertainty
+        # check the way the smiles should be given 
+        # add the option of uploading a csv and describe the format 
+        # add a button to download the csv with the results
+        # plot the ranking plot with the uncertainties and provide molecular visualizations to each point
+        # add reference
+        scores= get_ecfp4_score(smiles1, smiles2) #, uncertainty
+
+    df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
+    pd.DataFrame(scores, columns=['score'])], axis=1)
+    st.write(df)
+    #ranking_plot(scores)
+    plottly_raking(df)
+    
+
+if st.sidebar.button('Predict!'):
+    print('tza')
+    rank_pairs(smiles1.split(), smiles2.split(), model)
+    # call a function to convert the smiles to vector, select the model and create the plots
+
+

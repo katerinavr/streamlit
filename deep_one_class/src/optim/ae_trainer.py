@@ -9,6 +9,13 @@ import torch
 import torch.optim as optim
 import numpy as np
 
+def bidirectional_score(y_pred, y_true):
+  split_idx = y_true.shape[1]//2
+  flip = y_true[:, list(range(split_idx, split_idx * 2)) + list(range(split_idx))]
+  scores_1 = torch.sum((y_pred - y_true) ** 2, dim=tuple(range(1, y_pred.dim())))
+  scores_2 = torch.sum((y_pred - flip) ** 2, dim=tuple(range(1, y_pred.dim())))#
+  scores = torch.min(scores_1, scores_2)
+  return scores
 
 class AETrainer(BaseTrainer):
 
@@ -55,7 +62,8 @@ class AETrainer(BaseTrainer):
 
                 # Update network parameters via backpropagation: forward + backward + optimize
                 outputs = ae_net(inputs)
-                scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                #scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                scores =nakius_score(inputs, outputs)
                 loss = torch.mean(scores)
                 loss.backward()
                 optimizer.step()
@@ -95,7 +103,8 @@ class AETrainer(BaseTrainer):
                 inputs, labels, idx = data
                 inputs = inputs.to(self.device)
                 outputs = ae_net(inputs)
-                scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                #scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                scores = bidirectional_score(inputs, outputs)
                 loss = torch.mean(scores)
 
                 # Save triple of (idx, label, score) in a list
@@ -112,9 +121,10 @@ class AETrainer(BaseTrainer):
         labels = np.array(labels)
         scores = np.array(scores)
 
-        #auc = roc_auc_score(labels, scores)
-        #logger.info('Test set AUC: {:.2f}%'.format(100. * auc))
+        auc = roc_auc_score(labels, scores)
+        logger.info('Test set AUC: {:.2f}%'.format(100. * auc))
 
         test_time = time.time() - start_time
         logger.info('Autoencoder testing time: %.3f' % test_time)
         logger.info('Finished testing autoencoder.')
+        return auc
