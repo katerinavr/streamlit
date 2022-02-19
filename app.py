@@ -9,23 +9,26 @@ from rdkit import Chem
 from deep_one_class.ecfp4 import *
 from deep_one_class.src.utils.ranking_plot import *
 from deep_one_class.src.utils.plottly_ranking import *
+from deep_one_class.src.deepSVDD import *
 
 # Title the app
 st.title('Molecular Set Transformer')
 
 # Set page config
 st.markdown("""
+ * To the map of the existing co-crystals click here : https://csd-cocrystals.herokuapp.com
  * Use the menu at left to input the molecular pairs and select the model
  * Press the Predict button
  * Your plots will appear below
 """)
 
 st.sidebar.markdown("## Define molecular pairs")
-smiles1 = st.sidebar.text_area('Input the SMILES of the first coformer (API):') 
-smiles2 = st.sidebar.text_area('Input the SMILES of the second coformer (excipient):') 
+smiles1 = st.sidebar.text_area('Input a list of SMILES as the first coformer (API):') 
+smiles2 = st.sidebar.text_area('Input a list of SMILES as the second coformer (excipient):') 
 st.sidebar.markdown("## Pretrained models")
 model= st.sidebar.selectbox('Select the machine learning model',
                                     ['ECFP4', 'GNN'])
+
 
 def rank_pairs(smiles1, smiles2, model):
     # print a dataframe with smiles1 smiles2 score and uncertainty
@@ -43,18 +46,21 @@ def rank_pairs(smiles1, smiles2, model):
         # add a button to download the csv with the results
         # plot the ranking plot with the uncertainties and provide molecular visualizations to each point
         # add reference
-        scores= get_ecfp4_score(smiles1, smiles2) #, uncertainty
+        scores, uncertainty= ae_score_dropout(smiles1, smiles2) 
 
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
-    pd.DataFrame(scores, columns=['score'])], axis=1)
-    st.write(df)
-    #ranking_plot(scores)
-    plottly_raking(df)
-    
+    pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
+    df.to_csv('ranking.csv')
+   
 
 if st.sidebar.button('Predict!'):
-    print('tza')
+    #print('tza')
     rank_pairs(smiles1.split(), smiles2.split(), model)
-    # call a function to convert the smiles to vector, select the model and create the plots
+
+df = pd.read_csv('ranking.csv')
+st.write(df)
+with open('ranking.csv') as f:
+        st.download_button('Download Table as CSV', f)
+plottly_raking(df)
 
 

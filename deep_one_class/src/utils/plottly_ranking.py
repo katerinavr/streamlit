@@ -15,7 +15,12 @@ import streamlit as st
 from dash.dependencies import Input, Output
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem, Draw
-
+from streamlit_plotly_events import plotly_events
+import plotly.graph_objects as go
+from IPython.display import SVG
+from rdkit.Chem.Draw import rdMolDraw2D
+from rdkit.Chem.PandasTools import ChangeMoleculeRendering
+import plotly.graph_objects as go
 
 
 def plottly_raking(df):
@@ -31,84 +36,34 @@ def plottly_raking(df):
             'overflowX': 'scroll'
         }
     }
+
     df.sort_values(by='score', ascending=False, inplace=True)
     df['rank'] = np.arange(len(df.score))
+    col1, col2 = st.columns([3,1])
+    
 
-    fig = px.scatter(df , x='rank', y = 'score', custom_data=["smiles1","smiles2","score"])
-    fig.update_traces(marker=dict(size=10,
-                              line=dict(width=1,
-                                        color='DarkSlateGrey')),
-                  selector=dict(mode='markers'),
-                  marker_size=20)
-    fig.update_layout(clickmode='event+select')
+    st.subheader("Click on the points to visualize the pairs")
+    fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", hover_data=["smiles1","smiles2","score"])
+    #fig = go.Figure(data=go.Scatter(x=np.array(df.rank), y = np.array(df.score), error_y=dict(
+     #   type='data',
+      #      symmetric=False,
+       #     color='red',
+        #    array= np.array(df.uncertainty),
+         #   arrayminus=np.array(df.uncertainty)),
+    #))
+    fig.data[0].error_y.color = 'red'
+    
+    plot_name_holder = st.empty()
+    clicked_point = plotly_events(fig, click_event=True, hover_event=False)
 
+    if len(clicked_point) > 0:
+        smiles_1 = df.iloc[clicked_point[0]['x']]['smiles1']
+        m1 = Chem.MolFromSmiles(smiles_1)
+        im1=Draw.MolToImage(m1)
 
-    grid_style = {"border-radius": "4px", "margin": "2px","text-align": "center"}
-    header_style = {"background-color": "lightgrey"}
-    header_style.update(grid_style)
-    cell_style = {"padding": "130px 0"}
-    cell_style.update(grid_style)
+        smiles_2 = df.iloc[clicked_point[0]['x']]['smiles2']
+        m2 = Chem.MolFromSmiles(smiles_2)
+        im2=Draw.MolToImage(m2)
 
-    # Div is a block in html
-    app.layout = html.Div([
-        dcc.Graph(
-            id='main_plot',
-            figure=fig),
-
-        html.Div(id='table', children=[
-            # Header
-            html.Div(className='row', children=[
-                html.Div([html.P("Molecule 1")], className="five columns", style=header_style),
-                html.Div([html.P("Molecule 2")], className="five columns", style=header_style),
-                html.Div([html.P("Score")], className="one columns", style=header_style),
-                #html.Div([html.P("Uncertainty")], className="two columns", style=header_style),
-            ]),
-            # id is the name of the element to be displayed in html
-            html.Div(className='row', children=[
-                html.Div([
-                    html.Img(id='out-smile-1', src=app.get_asset_url('0_4.png')), #random
-                ], className='five columns', style=grid_style),
-
-                html.Div([
-                    html.Img(id='out-smile-2', src=app.get_asset_url('0_4.png')),
-                ], className='five columns', style=grid_style),
-                html.Div([html.P("0.5", id="score")], className="one columns", style=cell_style),
-                #html.Div([html.P("0.5", id="uncertainty")], className="two columns", style=cell_style),
-            ])
-        ])
-    ], className="container")
-
-    # wheverer a click occurs call the display_click_data()
-    # clickData is a dictionary automatically created by plottly
-    # points is a list of points that were clicked
-
-    @app.callback(
-        Output('out-smile-1', 'src'),
-        Output('out-smile-2', 'src'),
-        Output('score', 'children'),
-        #Output('uncertainty', 'children'),
-        Input('main_plot', 'clickData'))
-
-
-    def generate_image(smiles):
-        mol = Chem.MolFromSmiles(smiles)
-        return Chem.Draw.MolToImage(mol, size=(300,300))
-
-    def display_click_data(clickData):
-        if clickData:
-            smiles1, smiles2, score, uncertainty = clickData['points'][0]['customdata']
-            img1 = generate_image(smiles1)
-            img2 = generate_image(smiles2)
-            return format_img(img1),format_img(img2), f"{score:.2f}"#, f"{uncertainty:.2f}"
-        return [None, None, "", ""]
-
-    # Takes a pil image and returns the encoded version for display in html
-    def format_img(img):
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue())
-        return "data:image/png;base64," + img_str.decode('utf-8')
-
-    st.plotly_chart(fig, use_container_width=True)
-
-
+            
+        st.image([im1, im2], caption=[df.iloc[clicked_point[0]['x']]['smiles1'],df.iloc[clicked_point[0]['x']]['smiles2']])

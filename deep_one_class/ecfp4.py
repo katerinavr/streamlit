@@ -60,12 +60,14 @@ def ae_score(deep_SVDD, X):
 
 class PairsEncoder(BaseNet):
 
-    def __init__(self):
+    def __init__(self,proba=0.1):
         super().__init__()
         self.rep_dim = 50
         self.seq = nn.Sequential(SAB(dim_in=4096, dim_out=500, num_heads=10),
               #SAB(dim_in=1500, dim_out=500, num_heads=2),
+              nn.Dropout(p=proba),
               SAB(dim_in=500, dim_out=50, num_heads=10),
+              nn.Dropout(p=proba),
             PMA(dim=50, num_heads=10, num_seeds=1))
         
     def forward(self, inp):
@@ -76,12 +78,17 @@ class PairsEncoder(BaseNet):
 
 class PairsAutoEncoder(BaseNet):
 
-    def __init__(self):
+    def __init__(self,proba=0.1):
         super().__init__()
         self.encoder = PairsEncoder()
         self.encoder.apply(init_weights)
-        self.decoder = nn.Sequential( nn.Linear(in_features=50, out_features=4096), nn.LeakyReLU(),
-        nn.Linear(in_features=4096, out_features=8192), nn.Sigmoid())
+        self.decoder = nn.Sequential( nn.Linear(in_features=50, out_features=500), nn.LeakyReLU(),
+                                     nn.Dropout(p=proba),
+                                     nn.Linear(in_features=500, out_features=4096), nn.LeakyReLU(),
+                                     nn.Dropout(p=proba),
+                                     #nn.Linear(in_features=1000, out_features=4096), nn.LeakyReLU(),
+                                     #nn.Dropout(p=proba),
+        nn.Linear(in_features=4096, out_features=8192))#, nn.Sigmoid())# ,nn.LeakyReLU()
         self.decoder.apply(init_weights)
     def forward(self, x):
         return self.decoder(self.encoder(x))
@@ -106,9 +113,15 @@ def score(deep_SVDD, X):
             scores = dist
     return scores
 
+def enable_dropout(m):
+  for each_module in m.modules():
+    if each_module.__class__.__name__.startswith('Dropout'):
+      each_module.train()
+
 def get_ecfp4_score(smiles1, smiles2):
     validation_set = get_representation(smiles1, smiles2)
     torch.manual_seed(0)
+    
     deepSVDD.build_network = build_network
     deepSVDD.build_autoencoder = build_autoencoder
     deep_SVDD = deepSVDD.DeepSVDD(cfg.settings['objective'], cfg.settings['nu'])
@@ -116,6 +129,7 @@ def get_ecfp4_score(smiles1, smiles2):
     deep_SVDD.set_network(net_name)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'    
     deep_SVDD.load_model('deep_one_class/fingerprint_checkpoint.pth', True) 
+    print(deep_SVDD)
     X_scaler = MinMaxScaler()
     #train_data =  pd.read_csv('data/train_data.csv', encoding='latin1')
     #train_fingerprint = get_representation(train_data)
@@ -125,3 +139,39 @@ def get_ecfp4_score(smiles1, smiles2):
     scores_scaled = X_scaler.fit_transform(scores.reshape(-1,1)).ravel()
 
     return scores_scaled#, std
+
+
+def ae_score_dropout(smiles1, smiles2):
+  
+  validation_set = get_representation(smiles1, smiles2)
+  torch.manual_seed(0)
+    
+  deepSVDD.build_network = build_network
+  deepSVDD.build_autoencoder = build_autoencoder
+  deep_SVDD = deepSVDD.DeepSVDD(cfg.settings['objective'], cfg.settings['nu'])
+  net_name='fingerprint_checkpoint.pth'
+  deep_SVDD.set_network(net_name)
+  device = 'cuda' if torch.cuda.is_available() else 'cpu'    
+  deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
+  #print(deep_SVDD)
+  X=validation_set.iloc[:,:].values
+  with torch.no_grad():
+    torch.manual_seed(0)
+    result = []
+    for i in range(10):
+      net = deep_SVDD.ae_net.to('cpu')
+      X = torch.FloatTensor(X).to('cpu')
+      #print(X)
+      y = net(X)#.to(device)
+      #print(y)
+      #print(y.dim(), y.shape, X.shape)
+      scores = -1*bidirectional_score(X, y)#torch.sum((y - X) ** 2, dim=tuple(range(1, y.dim())))
+      scores = scores.clip(-50,0)
+      scaler = MinMaxScaler()
+      #lab = -1*ae_score(deep_SVDD, df_paws.iloc[:,:].values).cpu().detach().numpy() #
+      #lab = lab.clip(-50,0)
+      #lab1 = X_scaler.fit_transform(lab.reshape(-1,1))
+      #scores=X_scaler.transform(scores.reshape(-1, 1)).ravel()
+      scores=scaler.fit_transform(scores.reshape(-1, 1)).ravel()
+      result.append(scores)     
+  return np.mean(result, axis=0), np.std(result, axis=0) 
