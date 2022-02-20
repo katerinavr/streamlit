@@ -16,7 +16,7 @@ plt.rcParams["axes.labelweight"] = "normal"
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams.update({'font.size': 16})
 
-def ranking_plot(scores):
+def ranking_plot(scores, uncertainty):
     fig, ax = plt.subplots(figsize=(5,4))
     ax.set(adjustable='box')
     ax.spines['bottom'].set_color('black')
@@ -39,5 +39,6 @@ def ranking_plot(scores):
     pub_val_sort = pub_validation.sort_values(by='score', ascending=False) 
     x=np.arange(len(scores))
     ax.scatter(x ,pub_val_sort.score)
+    plt.errorbar(x ,pub_val_sort.score, yerr=uncertainty, fmt="o")
     #plt.title('Validation dataset')
     st.pyplot(fig)
