@@ -86,7 +86,7 @@ prompt-toolkit==3.0.27
 protobuf==3.18.1
 pure-eval==0.2.2
 pyarrow==6.0.0
-pycairo==1.20.1
+#pycairo==1.20.1
 pycparser==2.21
 pydeck==0.7.1
 Pygments==2.11.2
