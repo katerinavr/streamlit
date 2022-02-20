@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import base64
 import os, urllib
-#import deep_one_class.ecfp4
 from rdkit import Chem
 from deep_one_class.ecfp4 import *
 from deep_one_class.src.utils.ranking_plot import *
