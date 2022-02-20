@@ -42,28 +42,11 @@ def plottly_raking(df):
  
     df['color'] = 'blue'
     df.color[df.uncertainty > 0.1] = 'red'
-    #(pd.Series(    
-    #    np.where(df.uncertainty>0.1, 'red', 
-    #    'green')))
-
 
     st.subheader("Click on the points to visualize the pairs")
     fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", color="color", color_discrete_sequence=["blue", "red"],
      hover_data=["smiles1","smiles2","score"])
     fig.layout.update(showlegend=False)
-    #high_uncert = [i for i,v in enumerate(fig.data[0].error_y.array) if v > 0.1]
-    #if fig.data[0].error_y.array > 0.01:
-    #print(fig.data[0].error_y.array[high_uncert]) #.color = 'red'
-    #fig.data[0].error_y.color = 'red'
-    
-    #fig.data[0].error_y.color = (pd.Series(    
-    #    np.where(fig.data[0].error_y.array>0.1, 0, 
-    #    1).astype('int')),
-    #    colorscale=[[0, 'red'], [1, 'green']]))
-    
-    # print(np.where(fig.data[0].error_y.array == 0.0))
-    
-
 
     plot_name_holder = st.empty()
     clicked_point = plotly_events(fig, click_event=True, hover_event=False)
@@ -76,6 +59,4 @@ def plottly_raking(df):
         smiles_2 = df.iloc[clicked_point[0]['x']]['smiles2']
         m2 = Chem.MolFromSmiles(smiles_2)
         im2=Draw.MolToImage(m2)
-
-            
         st.image([im1, im2], caption=[df.iloc[clicked_point[0]['x']]['smiles1'],df.iloc[clicked_point[0]['x']]['smiles2']])
