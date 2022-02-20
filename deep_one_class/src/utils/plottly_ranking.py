@@ -39,20 +39,32 @@ def plottly_raking(df):
 
     df.sort_values(by='score', ascending=False, inplace=True)
     df['rank'] = np.arange(len(df.score))
-    col1, col2 = st.columns([3,1])
-    
+ 
+    df['color'] = 'blue'
+    df.color[df.uncertainty > 0.1] = 'red'
+    #(pd.Series(    
+    #    np.where(df.uncertainty>0.1, 'red', 
+    #    'green')))
+
 
     st.subheader("Click on the points to visualize the pairs")
-    fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", hover_data=["smiles1","smiles2","score"])
-    #fig = go.Figure(data=go.Scatter(x=np.array(df.rank), y = np.array(df.score), error_y=dict(
-     #   type='data',
-      #      symmetric=False,
-       #     color='red',
-        #    array= np.array(df.uncertainty),
-         #   arrayminus=np.array(df.uncertainty)),
-    #))
-    fig.data[0].error_y.color = 'red'
+    fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", color="color", color_discrete_sequence=["blue", "red"],
+     hover_data=["smiles1","smiles2","score"])
+    fig.layout.update(showlegend=False)
+    #high_uncert = [i for i,v in enumerate(fig.data[0].error_y.array) if v > 0.1]
+    #if fig.data[0].error_y.array > 0.01:
+    #print(fig.data[0].error_y.array[high_uncert]) #.color = 'red'
+    #fig.data[0].error_y.color = 'red'
     
+    #fig.data[0].error_y.color = (pd.Series(    
+    #    np.where(fig.data[0].error_y.array>0.1, 0, 
+    #    1).astype('int')),
+    #    colorscale=[[0, 'red'], [1, 'green']]))
+    
+    # print(np.where(fig.data[0].error_y.array == 0.0))
+    
+
+
     plot_name_holder = st.empty()
     clicked_point = plotly_events(fig, click_event=True, hover_event=False)
 
