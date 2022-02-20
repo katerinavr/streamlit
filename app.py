@@ -16,7 +16,7 @@ st.title('Molecular Set Transformer')
 
 # Set page config
 st.markdown("""
- * To the map of the existing co-crystals click here : https://csd-cocrystals.herokuapp.com
+ * To see the map of the existing co-crystals click here : https://csd-cocrystals.herokuapp.com
  * Use the menu at left to input the molecular pairs and select the model
  * Press the Predict button
  * Your plots will appear below
