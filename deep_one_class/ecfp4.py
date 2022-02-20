@@ -152,9 +152,9 @@ def ae_score_dropout(smiles1, smiles2):
   net_name='fingerprint_checkpoint.pth'
   deep_SVDD.set_network(net_name)
   device = 'cuda' if torch.cuda.is_available() else 'cpu'    
-  #model_path='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
-  #deep_SVDD.load_model(model_path, True)
-  deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
+  model_path='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
+  deep_SVDD.load_model(model_path, True)
+  #deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
   #print(deep_SVDD)
   X=validation_set.iloc[:,:].values
   with torch.no_grad():
