@@ -16,7 +16,11 @@ from deep_one_class.src import deepSVDD
 #from deep_one_class.visualizations import plots
 from deep_one_class.src.deepSVDD import *
 from deep_one_class.src.utils.config import Config
+from deep_one_class.utils import *
 import argparse
+import wget
+model_link='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
+
 
 cfg = Config({'nu': 0.05, 
               'objective':  'one-class'} ) 
@@ -118,29 +122,6 @@ def enable_dropout(m):
     if each_module.__class__.__name__.startswith('Dropout'):
       each_module.train()
 
-def get_ecfp4_score(smiles1, smiles2):
-    validation_set = get_representation(smiles1, smiles2)
-    torch.manual_seed(0)
-    
-    deepSVDD.build_network = build_network
-    deepSVDD.build_autoencoder = build_autoencoder
-    deep_SVDD = deepSVDD.DeepSVDD(cfg.settings['objective'], cfg.settings['nu'])
-    net_name='fingerprint_checkpoint.pth'
-    deep_SVDD.set_network(net_name)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'    
-    deep_SVDD.load_model('deep_one_class/fingerprint_checkpoint.pth', True) 
-    print(deep_SVDD)
-    X_scaler = MinMaxScaler()
-    #train_data =  pd.read_csv('data/train_data.csv', encoding='latin1')
-    #train_fingerprint = get_representation(train_data)
-    #train_scores = -1*ae_score(deep_SVDD, train_fingerprint.iloc[:,2:].values).cpu().detach().numpy()
-    #train_scores_scaled = X_scaler.fit_transform(train_scores.reshape(-1,1)).ravel()
-    scores = -1*ae_score(deep_SVDD, validation_set.iloc[:,:].values).cpu().detach().numpy()
-    scores_scaled = X_scaler.fit_transform(scores.reshape(-1,1)).ravel()
-
-    return scores_scaled#, std
-
-
 def ae_score_dropout(smiles1, smiles2):
   
   validation_set = get_representation(smiles1, smiles2)
@@ -152,10 +133,13 @@ def ae_score_dropout(smiles1, smiles2):
   net_name='fingerprint_checkpoint.pth'
   deep_SVDD.set_network(net_name)
   device = 'cuda' if torch.cuda.is_available() else 'cpu'    
-  model_path='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
+  model_path = 'deep_one_class/model_fingerprint.pth'
+  download_file(model_path, model_link)
+  deep_SVDD.load_model(model_path, True) 
+  
+  #ecfp4_model = wget.download(model_path)
   deep_SVDD.load_model(model_path, True)
   #deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
-  #print(deep_SVDD)
   X=validation_set.iloc[:,:].values
   with torch.no_grad():
     torch.manual_seed(0)

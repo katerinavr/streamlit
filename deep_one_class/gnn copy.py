@@ -14,8 +14,11 @@ from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import recall_score
 from deep_one_class.src import deepSVDD
+from deep_one_class.visualizations import plots
 from deep_one_class.src.deepSVDD import *
 from deep_one_class.src.utils.config import Config
+#from mordred import Calculator, descriptors  #https://github.com/mordred-descriptor/mordred
+calc = Calculator(descriptors, ignore_3D=True)
 import joblib
 import pickle
 import subprocess
@@ -26,8 +29,8 @@ cfg = Config({'nu': 0.05,
 def get_representation(smiles1, smiles2):
     """ Given the smiles of a validation dataset convert it to fingerprint
      representation """   
-    df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']),
-     pd.DataFrame(smiles2, columns=['smiles2'])], axis=1)
+    df = pd.concat([pd.DataFrame(smiles1),
+     pd.DataFrame(smiles2)], axis=1)
     return df
 
 def smiles2txt(dataset):  
@@ -55,33 +58,40 @@ def ae_score(deep_SVDD, X):
         torch.nn.init.xavier_uniform(m.weight)
         m.bias.data.fill_(0.01)
 
-class PairsEncoder(nn.Module):
 
-    def __init__(self,proba=0.1):
+class PairsEncoder(BaseNet):
+
+    def __init__(self):
         super().__init__()
         self.rep_dim = 50
         self.seq = nn.Sequential(SAB(dim_in=300, dim_out=150, num_heads=5),
-                                 nn.Dropout(p=proba),
-            SAB(dim_in=150, dim_out=50, num_heads=5),
-        PMA(dim=50, num_heads=5, num_seeds=1))
-
+              SAB(dim_in=150, dim_out=50, num_heads=5),
+            PMA(dim=50, num_heads=2, num_seeds=1))
+        
     def forward(self, inp):
       x = torch.split(inp, 300, dim=1)     
       x= torch.stack(x).transpose(0,1)
       x = self.seq(x).squeeze()
       return x.view(inp.size(0), -1)
 
-class PairsAutoEncoder(nn.Module):
-    def __init__(self, proba=0.1):
+    def get_attention_weights(self):
+        return [layer.get_attention_weights() for layer in self.seq]
+
+class PairsAutoEncoder(BaseNet):
+
+    def __init__(self):
         super().__init__()
-        self.encoder = PairsEncoder(proba)
+        self.encoder = PairsEncoder()
         self.encoder.apply(init_weights)
-        self.decoder = nn.Sequential( nn.Linear(in_features=50, out_features=300), nn.LeakyReLU(), #Leaky
-                                     #nn.Dropout(p=proba),
+        self.decoder = nn.Sequential( nn.Linear(in_features=50, out_features=150), nn.LeakyReLU(),
+                                     nn.Linear(in_features=150, out_features=300), nn.LeakyReLU(),
         nn.Linear(in_features=300, out_features=600))
         self.decoder.apply(init_weights)
     def forward(self, x):
-        return self.decoder(self.encoder(x)).squeeze()
+        return self.decoder(self.encoder(x))
+
+    def get_attention_weights(self):
+        return self.encoder.get_attention_weights()
 
 def build_autoencoder(net_name):
     return PairsAutoEncoder()
@@ -106,6 +116,9 @@ def score(deep_SVDD, X):
 def gnn_score_dropout(smiles1, smiles2):
    
     validation_set= get_representation(smiles1, smiles2)    
+    #dataset=dataset[~dataset.smiles1.isin(wrong_smiles)]
+    #dataset=dataset[~dataset.smiles2.isin(wrong_smiles)]
+
     smiles2txt(validation_set)
     subprocess.call("python gnn/main.py -fi gnn/smiles1.txt -m gin_supervised_masking -o gnn/results1", shell=True)
     subprocess.call("python gnn/main.py -fi gnn/smiles2.txt -m gin_supervised_masking -o gnn/results2", shell=True)
@@ -124,7 +137,7 @@ def gnn_score_dropout(smiles1, smiles2):
     #model_path='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
     #deep_SVDD.load_model(model_path, True)
     deep_SVDD.load_model('deep_one_class/model_300_1e-3_32_1e-05_gnn.pth', True) 
-
+    #print(deep_SVDD)
     X=validation_set.iloc[:,:].values
     with torch.no_grad():
         torch.manual_seed(0)

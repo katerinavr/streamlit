@@ -6,6 +6,7 @@ import base64
 import os, urllib
 from rdkit import Chem
 from deep_one_class.ecfp4 import *
+from deep_one_class.gnn import *
 from deep_one_class.src.utils.ranking_plot import *
 from deep_one_class.src.utils.plottly_ranking import *
 from deep_one_class.src.deepSVDD import *
@@ -33,7 +34,7 @@ model= st.sidebar.selectbox('Select the machine learning model',
 def rank_pairs(smiles1, smiles2, model):
     # print a dataframe with smiles1 smiles2 score and uncertainty
     if model == 'GNN':
-        pass
+        scores, uncertainty= gnn_score_dropout(smiles1, smiles2) 
         #call GNN model and fingerprint
         #scores, std = gnn.score(smiles1, smiles2)
     
