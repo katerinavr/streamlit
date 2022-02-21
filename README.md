@@ -9,4 +9,5 @@ Run the GUI:
 
 ```shell
 streamlit run app.py
+or click on the link: https://share.streamlit.io/katerinavr/streamlit/app.py
 ```
