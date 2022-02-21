@@ -9,5 +9,5 @@ Run the GUI:
 
 ```shell
 streamlit run app.py
-or click on [co-crystal screening]: https://share.streamlit.io/katerinavr/streamlit/app.py
 ```
+or click on [co-crystal screening]: https://share.streamlit.io/katerinavr/streamlit/app.py
