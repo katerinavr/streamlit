@@ -11,18 +11,24 @@ from deep_one_class.src.utils.ranking_plot import *
 from deep_one_class.src.utils.plottly_ranking import *
 from deep_one_class.src.deepSVDD import *
 
-# Title the app
-st.title('Molecular Set Transformer')
+col1,col2= st.columns([1,1])
 
-# Set page config
+with col1:
+    # Title the app
+    st.title('Molecular Set Transformer')
+    st.markdown('#### for co-crystal screening')
+
+with col2:
+    intro_figure = "image.png"
+    st.image(intro_figure, use_column_width=True) 
+
 st.markdown("""
- * To see the map of the existing co-crystals click here : https://csd-cocrystals.herokuapp.com
- * Use the menu at left to input the molecular pairs and select the model
- * Press the Predict button
- * Your plots will appear below
- * Default dataset: artemisinin co-crystals ranking
-""")
-
+    * To see the map of the existing co-crystals click here : https://csd-cocrystals.herokuapp.com
+    * Use the menu at left to input the molecular pairs and select the model
+    * Press the Predict button
+    * Your plots will appear below
+    * Default dataset: artemisinin co-crystals ranking
+    """)
 st.sidebar.markdown("## Define molecular pairs")
 smiles1 = st.sidebar.text_area('Input a list of SMILES as the first coformer (API):') 
 smiles2 = st.sidebar.text_area('Input a list of SMILES as the second coformer (excipient):') 
@@ -51,16 +57,15 @@ def rank_pairs(smiles1, smiles2, model):
 
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
     pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
-    df.to_csv('ranking.csv')
+    df.to_csv('data/ranking.csv', index=None)
    
 
 if st.sidebar.button('Predict!'):
-    #print('tza')
     rank_pairs(smiles1.split(), smiles2.split(), model)
 
-df = pd.read_csv('ranking.csv')
+df = pd.read_csv('data/ranking.csv')
 st.write(df)
-with open('ranking.csv') as f:
+with open('data/ranking.csv') as f:
         st.download_button('Download Table as CSV', f)
 plottly_raking(df)
 
