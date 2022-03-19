@@ -137,7 +137,7 @@ def gnn_score_dropout(smiles1, smiles2):
             #print(y)
             #print(y.dim(), y.shape, X.shape)
             scores = -1*bidirectional_score(X, y)#torch.sum((y - X) ** 2, dim=tuple(range(1, y.dim())))
-            scores = scores.clip(-50,0)
+            #scores = scores.clip(-50,0)
             scaler = MinMaxScaler()
             #lab = -1*ae_score(deep_SVDD, df_paws.iloc[:,:].values).cpu().detach().numpy() #
             #lab = lab.clip(-50,0)
