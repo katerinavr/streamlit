@@ -41,11 +41,10 @@ def rank_pairs(smiles1, smiles2, model):
     # print a dataframe with smiles1 smiles2 score and uncertainty
     if model == 'GNN':
         scores, uncertainty= gnn_score_dropout(smiles1, smiles2) 
-        #call GNN model and fingerprint
-        #scores, std = gnn.score(smiles1, smiles2)
+        #call GNN model 
     
     else: 
-        # call ECFP4 model and fingerprint
+        # call ECFP4 model
         # check if a valid smiles is given
         # print uncertainty
         # check the way the smiles should be given 
@@ -58,10 +57,13 @@ def rank_pairs(smiles1, smiles2, model):
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
     pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
     df.to_csv('data/ranking.csv', index=None)
+    
    
 
 if st.sidebar.button('Predict!'):
-    rank_pairs(smiles1.split(), smiles2.split(), model)
+    df = rank_pairs(smiles1.split(), smiles2.split(), model)
+    
+    
 
 df = pd.read_csv('data/ranking.csv')
 st.write(df)
