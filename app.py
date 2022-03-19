@@ -41,7 +41,7 @@ def rank_pairs(smiles1, smiles2, model):
     # print a dataframe with smiles1 smiles2 score and uncertainty
     if model == 'GNN':
         scores, uncertainty= gnn_score_dropout(smiles1, smiles2) 
-        print(scores)
+        #print(scores)
         #call GNN model 
     
     else: 
@@ -54,7 +54,7 @@ def rank_pairs(smiles1, smiles2, model):
         # plot the ranking plot with the uncertainties and provide molecular visualizations to each point
         # add reference
         scores, uncertainty= ae_score_dropout(smiles1, smiles2) 
-        print(scores)
+        #print(scores)
 
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
     pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
