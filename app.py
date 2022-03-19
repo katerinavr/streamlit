@@ -56,12 +56,13 @@ def rank_pairs(smiles1, smiles2, model):
 
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
     pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
-    df.to_csv('data/ranking.csv', index=None)
-    
+    #df.to_csv('data/ranking.csv', index=None)
+    return df
    
 
 if st.sidebar.button('Predict!'):
     df = rank_pairs(smiles1.split(), smiles2.split(), model)
+    df.to_csv('data/ranking.csv', index=None)
     
     
 
