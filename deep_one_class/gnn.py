@@ -19,6 +19,7 @@ from deep_one_class.src.utils.config import Config
 import joblib
 import pickle
 import subprocess
+import sys
 
 cfg = Config({'nu': 0.05, 
               'objective':  'one-class'} ) 
@@ -107,8 +108,9 @@ def gnn_score_dropout(smiles1, smiles2):
    
     validation_set= get_representation(smiles1, smiles2)    
     smiles2txt(validation_set)
-    subprocess.call("python3 gnn/main.py -fi gnn/smiles1.txt -m gin_supervised_masking -o gnn/results1", shell=True)
-    subprocess.call("python3 gnn/main.py -fi gnn/smiles2.txt -m gin_supervised_masking -o gnn/results2", shell=True)
+    python = sys.executable
+    subprocess.call(f"{python} gnn/main.py -fi gnn/smiles1.txt -m gin_supervised_masking -o gnn/results1", shell=True)
+    subprocess.call(f"{python} gnn/main.py -fi gnn/smiles2.txt -m gin_supervised_masking -o gnn/results2", shell=True)
     valid1 = np.load('gnn/results1/mol_emb.npy')
     valid2 = np.load('gnn/results2/mol_emb.npy')
     #print(valid1.shape)
