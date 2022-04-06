@@ -14,7 +14,7 @@ from deep_one_class.src.deepSVDD import *
 col1,col2= st.columns([1,1])
 
 with col1:
-    # Title the app
+    '''Title the app'''
     st.title('Molecular Set Transformer')
     st.markdown('#### for co-crystal screening')
 
@@ -38,36 +38,23 @@ model= st.sidebar.selectbox('Select the machine learning model',
 
 
 def rank_pairs(smiles1, smiles2, model):
-    # print a dataframe with smiles1 smiles2 score and uncertainty
+    ''' Select between the gnn and ecfp4 models
+    and get a score and the uncertainty for any given molecular pair ''' 
+    # TODO: check if a valid smiles is given
     if model == 'GNN':
         scores, uncertainty= gnn_score_dropout(smiles1, smiles2) 
-        #print(scores)
-        #call GNN model 
     
     else: 
-        # call ECFP4 model
-        # check if a valid smiles is given
-        # print uncertainty
-        # check the way the smiles should be given 
-        # add the option of uploading a csv and describe the format 
-        # add a button to download the csv with the results
-        # plot the ranking plot with the uncertainties and provide molecular visualizations to each point
-        # add reference
         scores, uncertainty= ae_score_dropout(smiles1, smiles2) 
-        #print(scores)
 
     df = pd.concat([pd.DataFrame(smiles1, columns=['smiles1']), pd.DataFrame(smiles2, columns=['smiles2']),
     pd.DataFrame(scores, columns=['score']), pd.DataFrame(uncertainty, columns=['uncertainty'])], axis=1)
-    #df.to_csv('data/ranking.csv', index=None)
     return df
    
-
 if st.sidebar.button('Predict!'):
     df = rank_pairs(smiles1.split(), smiles2.split(), model)
     df.to_csv('data/ranking.csv', index=None)
     
-    
-
 df = pd.read_csv('data/ranking.csv')
 st.write(df)
 with open('data/ranking.csv') as f:

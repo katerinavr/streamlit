@@ -19,6 +19,8 @@ from deep_one_class.src.utils.config import Config
 from deep_one_class.utils import *
 import argparse
 import wget
+import pickle 
+
 model_link='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
 
 
@@ -141,6 +143,7 @@ def ae_score_dropout(smiles1, smiles2):
   deep_SVDD.load_model(model_path, True)
   #deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
   X=validation_set.iloc[:,:].values
+  scaler = pickle.load(open('deep_one_class/fingerprint_scaler.pkl', 'rb'))
   with torch.no_grad():
     torch.manual_seed(0)
     result = []
@@ -149,15 +152,14 @@ def ae_score_dropout(smiles1, smiles2):
       X = torch.FloatTensor(X).to('cpu')
       #print(X)
       y = net(X)#.to(device)
-      #print(y)
-      #print(y.dim(), y.shape, X.shape)
-      scores = -1*bidirectional_score(X, y)#torch.sum((y - X) ** 2, dim=tuple(range(1, y.dim())))
+      scores = -1*bidirectional_score(X, y)
       scores = scores.clip(-50,0)
-      scaler = MinMaxScaler()
+      #MinMaxScaler()
       #lab = -1*ae_score(deep_SVDD, df_paws.iloc[:,:].values).cpu().detach().numpy() #
       #lab = lab.clip(-50,0)
       #lab1 = X_scaler.fit_transform(lab.reshape(-1,1))
       #scores=X_scaler.transform(scores.reshape(-1, 1)).ravel()
-      scores=scaler.fit_transform(scores.reshape(-1, 1)).ravel()
+      scores=scaler.transform(scores.reshape(-1, 1)).ravel()
+      scores = scores.clip(0,1)
       result.append(scores)     
   return np.mean(result, axis=0), np.std(result, axis=0) 
