@@ -45,7 +45,7 @@ def plottly_raking(df):
 
     st.subheader("Click on the points to visualize the pairs")
     st.markdown("Molecular pairs with high-uncertainty are shown in red")
-    fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", color="color", range_y=[0, 1],
+    fig = px.scatter(df , x='rank', y = 'score', error_y="uncertainty", color="color", 
     color_discrete_sequence=["blue", "red"], hover_data=["smiles1","smiles2","score"])
     fig.layout.update(showlegend=False)
 
