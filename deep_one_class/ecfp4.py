@@ -30,12 +30,17 @@ cfg = Config({'nu': 0.05,
 def get_representation(smiles1, smiles2):
     """ Given the smiles of a validation dataset convert it to fingerprint
      representation """   
-    df = pd.concat([fingerprint_from_df(smiles1, 'bits_1'),
-     fingerprint_from_df(smiles2, 'bits_2')], axis=1)
-    return df
+    
 
+    df = pd.concat([fingerprint_from_df(smiles1, 'bits_1'),
+    fingerprint_from_df(smiles2, 'bits_2')], axis=1)
+    
+    return df
+    
 def smile_to_fingerprint(smile):
-  mol = Chem.MolFromSmiles(smile)
+  #smi = Chem.MolToSmiles(Chem.MolFromSmiles(smile))
+  smi = Chem.CanonSmiles(smile) # 
+  mol = Chem.MolFromSmiles(smi)
   return AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=4096, useChirality=True)
 
 def fingerprint(smiles):
@@ -62,7 +67,6 @@ def ae_score(deep_SVDD, X):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_uniform(m.weight)
         m.bias.data.fill_(0.01)
-
 
 class PairsEncoder(BaseNet):
 
@@ -143,6 +147,7 @@ def ae_score_dropout(smiles1, smiles2):
   deep_SVDD.load_model(model_path, True)
   #deep_SVDD.load_model('deep_one_class/model_150_1e-3_64_1e-05_fingerprint.pth', True) 
   X=validation_set.iloc[:,:].values
+  print(X.shape)
   scaler = pickle.load(open('deep_one_class/fingerprint_scaler.pkl', 'rb'))
   with torch.no_grad():
     torch.manual_seed(0)
@@ -152,6 +157,8 @@ def ae_score_dropout(smiles1, smiles2):
       X = torch.FloatTensor(X).to('cpu')
       #print(X)
       y = net(X)#.to(device)
+      print(y)
+      print(y.dim(), y.shape, X.shape)
       scores = -1*bidirectional_score(X, y)
       scores = scores.clip(-50,0)
       #MinMaxScaler()

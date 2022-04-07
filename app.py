@@ -10,6 +10,8 @@ from deep_one_class.gnn import *
 from deep_one_class.src.utils.ranking_plot import *
 from deep_one_class.src.utils.plottly_ranking import *
 from deep_one_class.src.deepSVDD import *
+from rdkit import Chem
+from rdkit.Chem import AllChem
 
 col1,col2= st.columns([1,1])
 
@@ -32,6 +34,7 @@ st.markdown("""
 st.sidebar.markdown("## Define molecular pairs")
 smiles1 = st.sidebar.text_area('Input a list of SMILES as the first coformer (API):') 
 smiles2 = st.sidebar.text_area('Input a list of SMILES as the second coformer (excipient):') 
+
 st.sidebar.markdown("## Pretrained models")
 model= st.sidebar.selectbox('Select the machine learning model',
                                     ['ECFP4', 'GNN'])

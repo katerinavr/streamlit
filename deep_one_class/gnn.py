@@ -20,6 +20,7 @@ import joblib
 import pickle
 import subprocess
 import sys
+import pickle 
 
 cfg = Config({'nu': 0.05, 
               'objective':  'one-class'} ) 
@@ -82,7 +83,7 @@ class PairsAutoEncoder(nn.Module):
         nn.Linear(in_features=300, out_features=600))
         self.decoder.apply(init_weights)
     def forward(self, x):
-        return self.decoder(self.encoder(x)).squeeze()
+        return self.decoder(self.encoder(x))#.squeeze()
 
 def build_autoencoder(net_name):
     return PairsAutoEncoder()
@@ -109,14 +110,12 @@ def gnn_score_dropout(smiles1, smiles2):
     validation_set= get_representation(smiles1, smiles2)    
     smiles2txt(validation_set)
     python = sys.executable
-    subprocess.call(f"{python} gnn/main.py -fi gnn/smiles1.txt -m g rvised_masking -o gnn/results1", shell=True)
+    subprocess.call(f"{python} gnn/main.py -fi gnn/smiles1.txt -m gin_supervised_masking -o gnn/results1", shell=True)
     subprocess.call(f"{python} gnn/main.py -fi gnn/smiles2.txt -m gin_supervised_masking -o gnn/results2", shell=True)
     valid1 = np.load('gnn/results1/mol_emb.npy')
     valid2 = np.load('gnn/results2/mol_emb.npy')
-    #print(valid1.shape)
     validation_set = pd.concat([pd.DataFrame(valid1), pd.DataFrame(valid2)],axis=1)
-    torch.manual_seed(0)
-        
+    torch.manual_seed(0)   
     deepSVDD.build_network = build_network
     deepSVDD.build_autoencoder = build_autoencoder
     deep_SVDD = deepSVDD.DeepSVDD(cfg.settings['objective'], cfg.settings['nu'])
@@ -126,25 +125,19 @@ def gnn_score_dropout(smiles1, smiles2):
     #model_path='https://github.com/katerinavr/streamlit/releases/download/weights/model_150_1e-3_64_1e-05_fingerprint.pth'
     #deep_SVDD.load_model(model_path, True)
     deep_SVDD.load_model('deep_one_class/model_300_1e-3_32_1e-05_gnn.pth', True) 
-
     X=validation_set.iloc[:,:].values
+    scaler = pickle.load(open('deep_one_class/gnn_scaler.pkl', 'rb'))
     with torch.no_grad():
         torch.manual_seed(0)
         result = []
         for i in range(10):
             net = deep_SVDD.ae_net.to('cpu')
             X = torch.FloatTensor(X).to('cpu')
-            #print(X)
-            y = net(X)#.to(device)
-            #print(y)
-            #print(y.dim(), y.shape, X.shape)
-            scores = -1*bidirectional_score(X, y)#torch.sum((y - X) ** 2, dim=tuple(range(1, y.dim())))
-            #scores = scores.clip(-50,0)
-            scaler = MinMaxScaler()
-            #lab = -1*ae_score(deep_SVDD, df_paws.iloc[:,:].values).cpu().detach().numpy() #
-            #lab = lab.clip(-50,0)
-            #lab1 = X_scaler.fit_transform(lab.reshape(-1,1))
-            #scores=X_scaler.transform(scores.reshape(-1, 1)).ravel()
-            scores=scaler.fit_transform(scores.reshape(-1, 1)).ravel()
+            y = net(X)
+            scores = -1*bidirectional_score(X, y)
+            scores=scaler.transform(scores.reshape(-1, 1)).ravel()
             result.append(scores)     
-    return np.mean(result, axis=0), np.std(result, axis=0) 
+
+    scores = np.mean(result, axis=0)
+    scores = scores.clip(0,1)
+    return scores, np.std(result, axis=0) 
